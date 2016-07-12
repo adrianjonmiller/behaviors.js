@@ -46,7 +46,8 @@ Result is
 ```
 <div data-view="vieName">Some Content</div>
 ```
-Examples 2:
+
+Examples 2: Initializing behaviors on incoming content.
 HTML
 ```
 <div data-view="viewName"></div>
