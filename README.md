@@ -42,8 +42,10 @@ js:
 ```
 Js.Views.viewName.content = "Some Content";
 ```
-Result is: <div data-view="vieName">Some Content</div>
-
+Result is
+```
+<div data-view="vieName">Some Content</div>
+```
 Examples 2:
 HTML
 ```
@@ -54,7 +56,10 @@ js:
 Js.Views.viewName.content = "<div data-behavior=\"setHTML\"></div>";
 
 Js.Behaviors.setHTML = function(container) {
-  container.innherHTML = "Successfully initated behavior";
+  container.innerHTML = "Successfully initated behavior";
 };
 ```
-Result is: <div data-view="vieName"><div data-behavior="setHTML">Successfully initated behavior</div></div>
+Result is
+```
+<div data-view="vieName"><div data-behavior="setHTML">Successfully initated behavior</div></div>
+```
