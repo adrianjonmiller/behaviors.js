@@ -1,4 +1,4 @@
-Behaviors JS
+Js Dash
 ==============
 
 # Simple javascript framework
