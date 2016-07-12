@@ -1,10 +1,10 @@
 var Js = window.Js || {};
 Js.Behaviors = {};
 Js.Views = {};
-Js.Data = {};
+
 
 // Ready function
-Js._ready = function(fn) {
+Js.Ready = function(fn) {
   if (document.readyState != 'loading'){
     fn();
   } else {
@@ -12,10 +12,12 @@ Js._ready = function(fn) {
   }
 }
 
+
 // HTTP Request
-Js._request = function(url, cb) {
+Js._request = function(type, url, cb) {
   var request = new XMLHttpRequest();
-  request.open('GET', url, true);
+  request.open(type, url, true);
+
   request.onload = function() {
     if (request.status >= 200 && request.status < 400) {
       if( typeof cb === 'function' ) {
@@ -26,16 +28,11 @@ Js._request = function(url, cb) {
     }
   };
 
-  request.onerror = function() {
+  request.onerror = function(errorMsg) {
+    console.log(errorMsg);
   };
 
   request.send();
-}
-
-// Compile
-Js._compile = function(template, view) {
-  var template = Handlebars.compile(template);
-	return template(view);
 }
 
 
@@ -45,18 +42,18 @@ Js._init = function (context) {
     context = document;
   }
 
-  // Views loop
+  // Views Loop
   var views = context.querySelectorAll('[data-view]');
   for(i=0; i<views.length; i++) {
     var view = views[i];
     var states = view.getAttribute('data-view').split(' ');
     for(j=0; j<states.length; j++) {
-      var state = states[i];
-      Js.Views[state] = _view(view);
+      var state = states[j];
+      Js.Views[state] = Js._view(view);
     }
   }
 
-  // Elements loop
+  // Elements Loop
   var elements = context.querySelectorAll('[data-behavior]');
   for(i=0; i<elements.length; i++) {
     var element = elements[i];
@@ -65,7 +62,9 @@ Js._init = function (context) {
       var behavior = behaviors[j];
       if(!element[behavior]) {
         try {
-          element[behavior] = new Js.Behaviors[behavior](element);
+          if(Js.Behaviors[behavior]) {
+            element[behavior] = new Js.Behaviors[behavior](element);
+          }
         } catch (e) {
           console.log(e.stack);
         }
@@ -74,30 +73,37 @@ Js._init = function (context) {
   }
 }
 
+// View container
+Js._view = function(view) {
+  view.content = "";
+  view.history = [];
+  view.watch('content', function(id, oldval, newval){
+    if(view.history[view.history.length - 1] !== newval) {
+      view.history.push(oldval);
+    }
+    console.log(view.history);
+    Js._render(view, newval);
+    return newval;
+  });
 
-// Runs initializeBehaviors after DOM Ready
-Js._ready(function(){
-  var start = +new Date();
-  Js._init();
-  var end =  +new Date();  // log end timestamp
-  var diff = end - start;
-  console.log(diff/1000);
-});
+  return view;
+}
 
-function _render(params){
-  if(params.template) {
-    Js._request(params.template, function(result){
-      if(params.data && Handlebars) {
-        var template = Handlebars.compile(result);
-        params.view.innerHTML(template(params.data));
-      } else {
-        params.view.innerHTML(result);
-      }
-    });
+// Render content
+Js._render = function(view, d){
+  if(d) {
+    var range = document.createRange();
+    var frag = range.createContextualFragment(d);
+    Js._init(frag);
+
+    if(view.hasChildNodes())
+      view.innerHTML = "";
+
+    view.appendChild(frag);
   }
 }
 
-//Returns true if it is a DOM element
+// Returns true if it is a DOM element
 function _isElement(o){
   return (
     typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
@@ -105,25 +111,12 @@ function _isElement(o){
   );
 }
 
-// View container
-function _view(view) {
-  view.render = function(params, cb){
-    if(params) {
-      Js._request(params, function(result){
-				var range = document.createRange();
-				var frag = range.createContextualFragment(result);
-				Js._init(frag);
 
-				if(view.hasChildNodes())
-					view.innerHTML = "";
-
-				if( typeof cb === 'function' ) {
-	        cb(view, frag);
-	      }	else {
-					view.appendChild(frag);
-				}
-      })
-    }
-  }
-  return view;
-}
+// Runs Init after DOM Ready
+Js.Ready(function(){
+  var start = +new Date();
+  Js._init();
+  var end =  +new Date();  // log end timestamp
+  var diff = end - start;
+  console.log("Scripts executed in " + diff/1000 + " seconds.");
+});
