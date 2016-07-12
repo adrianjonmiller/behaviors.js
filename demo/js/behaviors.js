@@ -120,3 +120,10 @@ Js.Ready(function(){
   var diff = end - start;
   console.log("Scripts executed in " + diff/1000 + " seconds.");
 });
+
+// Listen for DOM changes. Target's what changed and runs the initializeBehaviors on the child nodes
+// document.addEventListener('DOMSubtreeModified', function(e){
+//   if(_isElement(e.target)) {
+//     Js._init(e.target);
+//   }
+// });
