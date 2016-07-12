@@ -19,7 +19,7 @@ Js.Behaviors.functionName = function(theDOMElement){
   };
 };
 
-// Jquery
+// Jquery Example
 
 Js.Behaviors.functionName = function(theDOMElement) {
   $(theDOMElement).on('click', function(){
