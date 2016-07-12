@@ -57,7 +57,7 @@ js:
 Js.Views.viewName.content = "<div class=\"js-setHTML\"></div>";
 
 Js.Behaviors.setHTML = function(container) {
-  container.innerHTML = "Successfully initated behavior";
+  container.content = "Successfully initated behavior";
 };
 ```
 Result is
