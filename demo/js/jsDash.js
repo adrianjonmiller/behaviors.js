@@ -1,7 +1,9 @@
 var Js = window.Js || {};
-Js.Behaviors = {};
-Js.Views = {};
+var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+var config = { attributes: true, childList: true, characterData: true };
 
+Js.Dash = {};
+Js.View = {};
 
 // Ready function
 Js.Ready = function(fn) {
@@ -42,31 +44,27 @@ Js._init = function (context) {
     context = document;
   }
 
-  // Views Loop
-  var views = context.querySelectorAll('[data-view]');
-  for(i=0; i<views.length; i++) {
-    var view = views[i];
-    var states = view.getAttribute('data-view').split(' ');
-    for(j=0; j<states.length; j++) {
-      var state = states[j];
-      Js.Views[state] = Js._view(view);
-    }
-  }
-
   // Elements Loop
-  var elements = context.querySelectorAll('[data-behavior]');
-  for(i=0; i<elements.length; i++) {
-    var element = elements[i];
-    var behaviors = element.getAttribute('data-behavior').split(' ');
-    for(j=0; j<behaviors.length; j++) {
-      var behavior = behaviors[j];
-      if(!element[behavior]) {
-        try {
-          if(Js.Behaviors[behavior]) {
-            element[behavior] = new Js.Behaviors[behavior](element);
+  var elements = context.querySelectorAll('[class*="js-"]');
+  if(elements.length != 0) {
+    for(i=0; i<elements.length; i++) {
+      var element = elements[i];
+      var behaviors = element.getAttribute('class').split(' ');
+      for(j=0; j<behaviors.length; j++) {
+        var behavior = behaviors[j];
+        if(behavior.startsWith("js-")) {
+          behavior = behavior.substring("js-".length);
+          Js.View[behavior] = Js._view(element);
+
+          if(!element[behavior]) {
+            try {
+              if(Js.Dash[behavior]) {
+                element[behavior] = new Js.Dash[behavior](element);
+              }
+            } catch (e) {
+              console.log(e.stack);
+            }
           }
-        } catch (e) {
-          console.log(e.stack);
         }
       }
     }
@@ -75,13 +73,11 @@ Js._init = function (context) {
 
 // View container
 Js._view = function(view) {
-  view.content = "";
   view.history = [];
   view.watch('content', function(id, oldval, newval){
     if(view.history[view.history.length - 1] !== newval) {
       view.history.push(oldval);
     }
-    console.log(view.history);
     Js._render(view, newval);
     return newval;
   });
@@ -103,15 +99,6 @@ Js._render = function(view, d){
   }
 }
 
-// Returns true if it is a DOM element
-function _isElement(o){
-  return (
-    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
-    o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
-  );
-}
-
-
 // Runs Init after DOM Ready
 Js.Ready(function(){
   var start = +new Date();
@@ -120,10 +107,3 @@ Js.Ready(function(){
   var diff = end - start;
   console.log("Scripts executed in " + diff/1000 + " seconds.");
 });
-
-// Listen for DOM changes. Target's what changed and runs the initializeBehaviors on the child nodes
-// document.addEventListener('DOMSubtreeModified', function(e){
-//   if(_isElement(e.target)) {
-//     Js._init(e.target);
-//   }
-// });

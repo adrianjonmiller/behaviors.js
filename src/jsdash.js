@@ -1,6 +1,9 @@
 var Js = window.Js || {};
-Js.Dash = {};
+var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+var config = { attributes: true, childList: true, characterData: true };
 
+Js.Dash = {};
+Js.View = {};
 
 // Ready function
 Js.Ready = function(fn) {
@@ -41,21 +44,6 @@ Js._init = function (context) {
     context = document;
   }
 
-  // Views Loop
-  var views = context.querySelectorAll('[class*="view-"]');
-  if(views.length != 0) {
-    for(i=0; i<views.length; i++) {
-      var view = views[i];
-      var states = view.getAttribute('class').split(' ');
-      for(j=0; j<states.length; j++) {
-        var state = states[j];
-        if(state.startsWith("view-")) {
-          window[state.substring("view-".length)] = Js._view(view);
-        }
-      }
-    }
-  }
-
   // Elements Loop
   var elements = context.querySelectorAll('[class*="js-"]');
   if(elements.length != 0) {
@@ -66,6 +54,7 @@ Js._init = function (context) {
         var behavior = behaviors[j];
         if(behavior.startsWith("js-")) {
           behavior = behavior.substring("js-".length);
+          Js.View[behavior] = Js._view(element);
 
           if(!element[behavior]) {
             try {
@@ -84,7 +73,6 @@ Js._init = function (context) {
 
 // View container
 Js._view = function(view) {
-  view.content = "";
   view.history = [];
   view.watch('content', function(id, oldval, newval){
     if(view.history[view.history.length - 1] !== newval) {
@@ -111,15 +99,6 @@ Js._render = function(view, d){
   }
 }
 
-// Returns true if it is a DOM element
-function _isElement(o){
-  return (
-    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
-    o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
-  );
-}
-
-
 // Runs Init after DOM Ready
 Js.Ready(function(){
   var start = +new Date();
@@ -128,10 +107,3 @@ Js.Ready(function(){
   var diff = end - start;
   console.log("Scripts executed in " + diff/1000 + " seconds.");
 });
-
-// Listen for DOM changes. Target's what changed and runs the initializeBehaviors on the child nodes
-// document.addEventListener('DOMSubtreeModified', function(e){
-//   if(_isElement(e.target)) {
-//     Js._init(e.target);
-//   }
-// });
