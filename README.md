@@ -13,15 +13,15 @@ HTML
 ```
 js:
 ```
-Js.Behaviors.functionName = function(theDOMElement){
-  theDOMElement.addEventListener('click', eventHandler){
-    alert('You clicked me!');
-  };
+Js.Dash.functionName = function(theDOMElement){
+  theDOMElement.addEventListener('click', function(){
+    alert('You Clicked Me');
+  });
 };
 
 // Jquery Example
 
-Js.Behaviors.functionName = function(theDOMElement) {
+Js.Dash.functionName = function(theDOMElement) {
   $(theDOMElement).on('click', function(){
     alert('You clicked me!');
   });
